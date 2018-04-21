@@ -78,7 +78,7 @@ public class HomeFragment extends Fragment {
     public void getData() {
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
-        Call<List<LigneTransport>> call = service.getLigneTransportData();
+        Call<List<LigneTransport>> call = service.getLignesData();
 
         Log.wtf("URL called", call.request().url() + "");
 
@@ -91,7 +91,10 @@ public class HomeFragment extends Fragment {
                 else {
                     Log.wtf("RESPONSE", response.body().toString());
                     for (LigneTransport ligne : response.body()){
-                        dataList.add(ligne);
+                        /* TODO : sort the list from the REST api to display only SEM ligne */
+                        if(ligne.getId().contains("SEM:")){
+                            dataList.add(ligne);
+                        }
                     }
                     ligneTransportAdapter.notifyDataSetChanged();
                 }

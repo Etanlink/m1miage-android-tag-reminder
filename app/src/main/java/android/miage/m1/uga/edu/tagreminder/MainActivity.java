@@ -15,8 +15,6 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
