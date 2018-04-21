@@ -30,45 +30,19 @@ public class Arret {
         this.lat = lat;
     }
 
-    public String getCode() {
-        return code;
-    }
+    /* GETTER */
+    public String getCode() { return code; }
+    public String getCity() { return city; }
+    public String getName() { return name; }
+    public Double getLon() { return lon; }
+    public Double getLat() { return lat; }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
-        this.lon = lon;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
+    /* SETTER */
+    public void setCode(String code) { this.code = code; }
+    public void setCity(String city) { this.city = city; }
+    public void setName(String name) { this.name = name; }
+    public void setLon(Double lon) { this.lon = lon; }
+    public void setLat(Double lat) { this.lat = lat; }
 
     @Override
     public String toString() {

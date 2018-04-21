@@ -3,4 +3,6 @@
     <string name="title_home">Accueil</string>
     <string name="title_map">Carte</string>
     <string name="title_favorites">Favoris</string>
+    <string name="pick_a_stop">Choisir un arrêt</string>
+    <string name="pick_a_line">Choisissez la ligne</string>
 </resources>

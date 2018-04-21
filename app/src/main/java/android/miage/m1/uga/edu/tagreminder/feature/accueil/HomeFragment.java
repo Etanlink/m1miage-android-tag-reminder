@@ -7,6 +7,7 @@ import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,11 +30,11 @@ public class HomeFragment extends Fragment {
     RecyclerView recyclerView;
     List<LigneTransport> dataList = new ArrayList<LigneTransport>();
 
-    private RecyclerItemClickListener recyclerItemClickListener = new RecyclerItemClickListener() {
+    private LigneItemClickListener ligneItemClickListener = new LigneItemClickListener() {
         @Override
         public void onItemClick(LigneTransport ligneTransport) {
-            /* TODO : start a new fragment with the ligneTransport information*/
             Toast.makeText(getActivity(),"Click :  " + ligneTransport.toString(), Toast.LENGTH_LONG).show();
+            /* TODO : start a new fragment with the ligneTransport information*/
         }
     };
 
@@ -52,9 +53,9 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.fragment_home_recycler_view);
-        ligneTransportAdapter = new LigneTransportAdapter(getActivity(), dataList, recyclerItemClickListener);
+        ligneTransportAdapter = new LigneTransportAdapter(getActivity(), dataList, ligneItemClickListener);
 
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 4);
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 5);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -86,7 +87,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<List<LigneTransport>> call, Response<List<LigneTransport>> response) {
                 if (response==null){
-                    Toast.makeText(getActivity(), "Somthing Went Wrong...!!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Something Went Wrong...!!", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Log.wtf("RESPONSE", response.body().toString());
@@ -96,6 +97,7 @@ public class HomeFragment extends Fragment {
                             dataList.add(ligne);
                         }
                     }
+                    /* TODO : sort the list ascending */
                     ligneTransportAdapter.notifyDataSetChanged();
                 }
             }

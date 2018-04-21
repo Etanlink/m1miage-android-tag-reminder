@@ -1,10 +1,13 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +19,12 @@ class LigneTransportAdapter extends RecyclerView.Adapter<LigneTransportAdapter.L
 
     Context context;
     List<LigneTransport> items;
-    private RecyclerItemClickListener recyclerItemClickListener;
+    private LigneItemClickListener ligneItemClickListener;
 
-    public LigneTransportAdapter(Context context, List<LigneTransport> items, RecyclerItemClickListener recyclerItemClickListener) {
+    public LigneTransportAdapter(Context context, List<LigneTransport> items, LigneItemClickListener ligneItemClickListener) {
         this.context = context;
         this.items = items;
-        this.recyclerItemClickListener = recyclerItemClickListener;
+        this.ligneItemClickListener = ligneItemClickListener;
     }
 
     @NonNull
@@ -34,16 +37,22 @@ class LigneTransportAdapter extends RecyclerView.Adapter<LigneTransportAdapter.L
 
     @Override
     public void onBindViewHolder(@NonNull LigneTransportHolder holder, final int position) {
-        LigneTransport ligne = items.get(position);
+        final LigneTransport ligne = items.get(position);
 
         holder.shortNameTxt.setText(ligne.getShortName());
-        holder.modeTxt.setText(ligne.getMode());
-        holder.typeTxt.setText(ligne.getType());
+
+        if(ligne.getTextColor() != null){
+            holder.shortNameTxt.setTextColor(Color.parseColor("#"+ligne.getTextColor()));
+        }
+
+        if(ligne.getColor() != null){
+            holder.logoCard.setCardBackgroundColor(Color.parseColor("#"+ligne.getColor()));
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recyclerItemClickListener.onItemClick(items.get(position));
+                ligneItemClickListener.onItemClick(ligne);
             }
         });
     }
@@ -61,13 +70,13 @@ class LigneTransportAdapter extends RecyclerView.Adapter<LigneTransportAdapter.L
 
     public class LigneTransportHolder extends RecyclerView.ViewHolder {
 
-        TextView shortNameTxt, modeTxt, typeTxt;
+        TextView shortNameTxt;
+        CardView logoCard;
 
         public LigneTransportHolder(View view) {
             super(view);
             shortNameTxt = (TextView) view.findViewById(R.id.txt_ligne_shortName);
-            modeTxt = (TextView) view.findViewById(R.id.txt_ligne_mode);
-            typeTxt = (TextView) view.findViewById(R.id.txt_ligne_type);
+            logoCard = (CardView) view.findViewById((R.id.crd_ligne));
         }
     }
 }
