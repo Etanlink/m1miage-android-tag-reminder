@@ -1,6 +1,7 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil;
 
 import android.content.Context;
+import android.miage.m1.uga.edu.tagreminder.feature.accueil.choisirArretParLigne.PickAStopFragment;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
@@ -33,7 +34,14 @@ public class HomeFragment extends Fragment {
         @Override
         public void onItemClick(LigneTransport ligneTransport) {
             Toast.makeText(getActivity(),"Click :  " + ligneTransport.toString(), Toast.LENGTH_LONG).show();
-            /* TODO : start a new fragment with the ligneTransport information*/
+
+            /* TODO : start a new fragment with the ligneTransport information */
+            PickAStopFragment pickAStopFragment = PickAStopFragment.newInstance(ligneTransport);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.to_replace, pickAStopFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
     };
 
