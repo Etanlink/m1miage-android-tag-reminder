@@ -7,7 +7,6 @@ import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -93,7 +92,7 @@ public class HomeFragment extends Fragment {
                     Log.wtf("RESPONSE", response.body().toString());
                     for (LigneTransport ligne : response.body()){
                         /* TODO : sort the list from the REST api to display only SEM ligne */
-                        if(ligne.getId().contains("SEM:")){
+                        if((ligne.getId().contains("SEM:")) && !(ligne.getId().contains("NAVA"))){
                             dataList.add(ligne);
                         }
                     }
