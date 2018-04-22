@@ -4,7 +4,9 @@ package android.miage.m1.uga.edu.tagreminder.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class LigneTransport {
+import java.io.Serializable;
+
+public class LigneTransport implements Serializable {
 
     @SerializedName("id")
     @Expose
