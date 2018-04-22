@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
@@ -50,7 +51,6 @@ public class PickAStopFragment extends Fragment {
         fragment.setArguments(args);
 
         ligne = (LigneTransport) args.getSerializable(ligneToAdd.getId());
-        Log.wtf("Ligne récupérée et désarialisée : ", ligne.toString());
 
         return fragment;
     }
@@ -64,7 +64,10 @@ public class PickAStopFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pick_a_stop, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_pick_a_stop_recycler_view);
+        TextView txtLigneName = (TextView) view.findViewById((R.id.txt_ligne_name));
+        txtLigneName.setText(ligne.getMode() + " " + ligne.getShortName());
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.rv_fragment_pick_a_stop);
         arretAdapter = new ArretAdapter(getActivity(), dataList, arretItemClickListener);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -89,6 +92,8 @@ public class PickAStopFragment extends Fragment {
     }
 
     public void getData() {
+        dataList.clear();
+
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
         Call<List<Arret>> call = service.getArretsOfALigne(ligne.getId());

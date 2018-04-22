@@ -4,6 +4,7 @@
     android:id="@+id/crd_ligne"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
     card_view:cardCornerRadius="6dp"
     card_view:cardElevation="3dp"
     card_view:cardUseCompatPadding="true">
@@ -11,16 +12,16 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
+        android:layout_margin="1dp"
         android:orientation="vertical"
-        android:padding="2dp">
+        android:padding="1dp">
 
         <TextView
             android:id="@+id/txt_ligne_shortName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="25dp"
             android:textStyle="bold"
-            android:textSize="20dp"
             android:layout_gravity="center"
             android:gravity="center"/>
 

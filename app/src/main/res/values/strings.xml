@@ -4,5 +4,6 @@
     <string name="title_map">Carte</string>
     <string name="title_favorites">Favoris</string>
     <string name="pick_a_stop">Choisir un arrêt</string>
-    <string name="pick_a_line">Choisissez la ligne</string>
+    <string name="pick_a_line">Choisissez une ligne</string>
+    <string name="tag_network">Lignes du réseau TAG</string>
 </resources>

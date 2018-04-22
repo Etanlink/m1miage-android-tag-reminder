@@ -33,9 +33,6 @@ public class HomeFragment extends Fragment {
     private LigneItemClickListener ligneItemClickListener = new LigneItemClickListener() {
         @Override
         public void onItemClick(LigneTransport ligneTransport) {
-            Toast.makeText(getActivity(),"Click :  " + ligneTransport.toString(), Toast.LENGTH_LONG).show();
-
-            /* TODO : start a new fragment with the ligneTransport information */
             PickAStopFragment pickAStopFragment = PickAStopFragment.newInstance(ligneTransport);
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
@@ -84,6 +81,8 @@ public class HomeFragment extends Fragment {
     }
 
     public void getData() {
+        dataList.clear();
+
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
         Call<List<LigneTransport>> call = service.getLignesData();
