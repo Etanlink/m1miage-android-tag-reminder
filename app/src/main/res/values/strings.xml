@@ -6,4 +6,10 @@
     <string name="pick_a_stop">Choisir un arrêt</string>
     <string name="pick_a_line">Choisissez une ligne</string>
     <string name="tag_network">Lignes du réseau TAG</string>
+    <string name="stop">Arrêt</string>
+    <string name="ligne">Ligne</string>
+    <string name="activer_rappel">Activer rappel</string>
+    <string name="ajouter_favoris">Ajouter aux favoris</string>
+    <string name="prochain_passage">Prochain passage</string>
+    <string name="passage_suivant">Passage suivant</string>
 </resources>

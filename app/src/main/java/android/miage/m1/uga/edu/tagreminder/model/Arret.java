@@ -3,7 +3,9 @@ package android.miage.m1.uga.edu.tagreminder.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Arret {
+import java.io.Serializable;
+
+public class Arret implements Serializable {
 
     @SerializedName("code")
     @Expose
