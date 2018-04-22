@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:orientation="vertical"
-        android:padding="5dp"
         android:background="?android:attr/selectableItemBackground">
 
         <TextView
@@ -20,13 +19,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:padding="3dp"/>
+            android:padding="2dp"/>
 
         <TextView
             android:id="@+id/txt_stop_city"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="3dp" />
+            android:padding="2dp" />
 
     </LinearLayout>
 

@@ -19,6 +19,7 @@
         android:id="@+id/txt_pick_a_line"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:textSize="15dp"
         android:layout_gravity="center"
         android:gravity="center"
