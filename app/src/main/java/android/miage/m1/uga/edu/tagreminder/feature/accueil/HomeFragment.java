@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Call;
@@ -26,9 +28,15 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
-    LigneTransportAdapter ligneTransportAdapter;
-    RecyclerView recyclerView;
-    List<LigneTransport> dataList = new ArrayList<LigneTransport>();
+    RecyclerView tramListRecyclerView;
+    RecyclerView busListRecyclerView;
+
+    LigneTransportAdapter tramListTransportAdapter;
+    LigneTransportAdapter busListTransportAdapter;
+
+    List<LigneTransport> tramList = new ArrayList<LigneTransport>();
+    List<LigneTransport> busList = new ArrayList<LigneTransport>();
+    List<LigneTransport> chronoList = new ArrayList<LigneTransport>();
 
     private LigneItemClickListener ligneItemClickListener = new LigneItemClickListener() {
         @Override
@@ -42,7 +50,7 @@ public class HomeFragment extends Fragment {
         }
     };
 
-    public static HomeFragment newInstance(){
+    public static HomeFragment newInstance() {
         return new HomeFragment();
     }
 
@@ -56,32 +64,48 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.fragment_home_recycler_view);
-        ligneTransportAdapter = new LigneTransportAdapter(getActivity(), dataList, ligneItemClickListener);
-
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 5);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        recyclerView.setAdapter(ligneTransportAdapter);
-
-        getData();
+        initRecyclerView(view);
 
         return view;
     }
 
+    private void initRecyclerView(View view) {
+
+        tramListRecyclerView = (RecyclerView) view.findViewById(R.id.tram_recycler_view);
+        busListRecyclerView = (RecyclerView) view.findViewById(R.id.bus_recycler_view);
+
+        tramListTransportAdapter = new LigneTransportAdapter(getActivity(), tramList, ligneItemClickListener);
+        busListTransportAdapter = new LigneTransportAdapter(getActivity(), chronoList, ligneItemClickListener);
+
+        RecyclerView.LayoutManager tramLayoutManager = new GridLayoutManager(getActivity(), 5);
+        tramListRecyclerView.setLayoutManager(tramLayoutManager);
+
+        RecyclerView.LayoutManager busLayoutManager = new GridLayoutManager(getActivity(), 6);
+        busListRecyclerView.setLayoutManager(busLayoutManager);
+
+        tramListRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        busListRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        tramListRecyclerView.setAdapter(tramListTransportAdapter);
+        busListRecyclerView.setAdapter(busListTransportAdapter);
+
+        fetchLigneTransportData();
+    }
+
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
     }
 
     @Override
-    public void onDetach(){
+    public void onDetach() {
         super.onDetach();
     }
 
-    public void getData() {
-        dataList.clear();
+    public void fetchLigneTransportData() {
+        tramList.clear();
+        busList.clear();
+        chronoList.clear();
 
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
@@ -92,19 +116,29 @@ public class HomeFragment extends Fragment {
         call.enqueue(new Callback<List<LigneTransport>>() {
             @Override
             public void onResponse(Call<List<LigneTransport>> call, Response<List<LigneTransport>> response) {
-                if (response==null){
+                if (response == null) {
                     Toast.makeText(getActivity(), "Something Went Wrong...!!", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Log.wtf("RESPONSE", response.body().toString());
-                    for (LigneTransport ligne : response.body()){
+                } else {
+                    for (LigneTransport ligne : response.body()) {
                         /* TODO : sort the list from the REST api to display only SEM ligne */
-                        if((ligne.getId().contains("SEM:")) && !(ligne.getId().contains("NAVA"))){
-                            dataList.add(ligne);
+                        if ((ligne.getId().contains("SEM:")) && !(ligne.getId().contains("NAV"))) {
+                            if(ligne.getType().contains("TRAM")) {
+                                tramList.add(ligne);
+                            }
+                            else if(ligne.getType().contains("CHRONO")) {
+                                chronoList.add(ligne);
+                            }
+                            else {
+                                busList.add(ligne);
+                            }
                         }
                     }
-                    /* TODO : sort the list ascending */
-                    ligneTransportAdapter.notifyDataSetChanged();
+                    sortData(tramList);
+                    sortData(busList);
+                    sortData(chronoList);
+                    chronoList.addAll(busList);
+                    tramListTransportAdapter.notifyDataSetChanged();
+                    busListTransportAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -113,6 +147,16 @@ public class HomeFragment extends Fragment {
                 Log.e("ERROR: ", t.getMessage());
             }
         });
+    }
+
+    public List<LigneTransport> sortData(List<LigneTransport> listToSort){
+        Collections.sort(listToSort, new Comparator<LigneTransport>() {
+            @Override
+            public int compare(LigneTransport o1, LigneTransport o2) {
+                return o1.getShortName().compareTo(o2.getShortName());
+            }
+        });
+        return listToSort;
     }
 
 }

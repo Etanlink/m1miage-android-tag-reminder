@@ -80,7 +80,7 @@ public class PickAStopFragment extends Fragment {
 
         recyclerView.setAdapter(arretAdapter);
 
-        getData();
+        fetchStopData();
 
         return view;
     }
@@ -95,12 +95,12 @@ public class PickAStopFragment extends Fragment {
         super.onDetach();
     }
 
-    public void getData() {
+    public void fetchStopData() {
         dataList.clear();
 
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
-        Call<List<Arret>> call = service.getArretsOfALigne(ligne.getId());
+        Call<List<Arret>> call = service.getArretsByALigne(ligne.getId());
 
         Log.wtf("URL called", call.request().url() + "");
 

@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="@string/tag_network"
+        android:text="@string/action_title"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -23,13 +23,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:text="@string/pick_a_line"
         android:textSize="15sp" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/fragment_home_recycler_view"
+        android:id="@+id/tram_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="true"
+        android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/bus_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipToPadding="true"
