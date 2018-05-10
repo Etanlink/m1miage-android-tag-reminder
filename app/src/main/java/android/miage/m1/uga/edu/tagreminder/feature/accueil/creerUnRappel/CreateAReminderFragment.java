@@ -1,19 +1,25 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel;
 
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.miage.m1.uga.edu.tagreminder.MainActivity;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.model.passage.Passage;
+import android.miage.m1.uga.edu.tagreminder.model.passage.Time;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +37,14 @@ public class CreateAReminderFragment extends Fragment {
     static LigneTransport ligne;
     static Arret arret;
 
-    List<LigneTransport> ligneList = new ArrayList<LigneTransport>();
     List<Passage> passageList = new ArrayList<Passage>();
 
     List<String> spinLigne = new ArrayList<String>();
     List<String> spinDirection = new ArrayList<String>();
+
+    SwipeRefreshLayout swipeRefreshLayout;
+    TextView txtProchainPassage;
+    TextView txtPassageSuivant;
 
     public static CreateAReminderFragment newInstance(LigneTransport ligneToAdd, Arret arretToAdd) {
         // DEBUG
@@ -66,11 +75,23 @@ public class CreateAReminderFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_create_a_reminder, container, false);
+        final View view = inflater.inflate(R.layout.fragment_create_a_reminder, container, false);
 
         /* INIT */
         TextView txtLigneName = (TextView) view.findViewById(R.id.txt_arret_name);
         txtLigneName.setText(arret.getName());
+
+        txtProchainPassage = (TextView) view.findViewById(R.id.txt_time_to_prochain_passage);
+        txtPassageSuivant = (TextView) view.findViewById((R.id.txt_time_to_prochain_prochain_passage));
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_passage);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(true);
+                fetchPassageData(view);
+            }
+        });
 
         Spinner spinLignes = (Spinner) view.findViewById(R.id.spin_lignes);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, spinLigne);
@@ -78,6 +99,8 @@ public class CreateAReminderFragment extends Fragment {
         spinLignes.setAdapter(adapter);
 
         fetchPassageData(view);
+
+        initButtons(view);
 
         return view;
     }
@@ -99,10 +122,13 @@ public class CreateAReminderFragment extends Fragment {
                 }
                 else {
                     for (Passage passage : response.body()){
-                        passageList.add(passage);
+                        if(passage.getPattern().getId().contains(ligne.getId())){
+                            passageList.add(passage);
+                        }
                     }
-                    updateDirection(view);
-                    updatePassage(view);
+                    txtProchainPassage.setText(updateProchainPassageByDirection(2));
+                    txtPassageSuivant.setText(updatePassageSuivantByDirection(2));
+                    swipeRefreshLayout.setRefreshing(false);
                 }
             }
 
@@ -111,6 +137,28 @@ public class CreateAReminderFragment extends Fragment {
                 Log.e("ERROR: ", t.getMessage());
             }
         });
+    }
+
+    private String updateProchainPassageByDirection(int direction){
+        String timeToProchainPassage = String.valueOf(R.string.time_to_prochain_passage);
+        for(Passage passage : passageList){
+            if((passage.getPattern().getDir().equals(direction)) && (passage.getTimes().get(0).getRealtimeArrival() != null)){
+                timeToProchainPassage = DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival());
+                break;
+            }
+        }
+        return timeToProchainPassage;
+    }
+
+    private String updatePassageSuivantByDirection(int direction){
+        String timeToPassageSuivant = String.valueOf(R.string.time_to_prochain_passage);
+        for(Passage passage : passageList){
+            if((passage.getPattern().getDir().equals(direction)) && (passage.getTimes().size() > 1)){
+                timeToPassageSuivant = DateUtils.formatElapsedTime(passage.getTimes().get(1).getRealtimeArrival());
+                break;
+            }
+        }
+        return timeToPassageSuivant;
     }
 
     private void updateDirection(View view) {
@@ -126,25 +174,45 @@ public class CreateAReminderFragment extends Fragment {
         }
     }
 
-    private void updatePassage(View view) {
-        // TODO : handle null case
-        TextView txtProchainPassage = (TextView) view.findViewById(R.id.txt_time_to_prochain_passage);
-        TextView txtPassageSuivant = (TextView) view.findViewById((R.id.txt_time_to_prochain_prochain_passage));
-        String timeToProchainPassage = null;
-        String timeToPassageSuivant = null;
+    /** BUTTONS **/
 
-        for(int i = 0; i < passageList.size(); i++){
-            if(passageList.get(i).getPattern().getId().contains(ligne.getId()) && passageList.get(i).getPattern().getDir().equals(1)){
-                if(!passageList.get(i).getTimes().get(0).getRealtimeArrival().equals(null)){
-                    timeToProchainPassage = DateUtils.formatElapsedTime(passageList.get(i).getTimes().get(0).getRealtimeArrival());
+    private void initButtons(View view) {
+        final CheckBox checkActivateReminder = (CheckBox) view.findViewById(R.id.check_activer_rappel);
+        checkActivateReminder.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.wtf("Create reminder", "Bouton clické !");
+                if(checkActivateReminder.isChecked()){
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+
+//                    NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity(), CHANNEL_ID)
+//                            .setSmallIcon(R.drawable.ic_bus_clock_24dp)
+//                            .setContentTitle("Prochains passages")
+//                            .setContentText("Prochain passage : " + timeToProchainPassage)
+//                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                            // Set the intent that will fire when the user taps the notification
+//                            .setContentIntent(pendingIntent)
+//                            .setAutoCancel(true);
                 }
-                if(!passageList.get(i).getTimes().get(1).getRealtimeArrival().equals(null)){
-                    Log.wtf("Prochain prochain pasage : ", passageList.get(i).getTimes().get(1).toString());
-                    timeToPassageSuivant = DateUtils.formatElapsedTime(passageList.get(i).getTimes().get(1).getRealtimeArrival());
+                else{
+                    Log.wtf("Activate reminder", "Uncheck !");
                 }
             }
-        }
-        txtProchainPassage.setText(timeToProchainPassage);
-        txtPassageSuivant.setText(timeToPassageSuivant);
+        });
+
+        final CheckBox checkAddToFavorites = (CheckBox) view.findViewById(R.id.check_ajouter_favoris);
+        checkAddToFavorites.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.wtf("Create reminder", "Bouton clické !");
+                if(checkAddToFavorites.isChecked()){
+                    Log.wtf("Add to favorites", "Check !");
+                }
+                else{
+                    Log.wtf("Add to favorites", "Uncheck !");
+                }
+            }
+        });
+
     }
 }

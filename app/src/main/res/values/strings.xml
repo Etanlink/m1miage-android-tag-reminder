@@ -13,4 +13,5 @@
     <string name="prochain_passage">Prochain passage</string>
     <string name="passage_suivant">Passage suivant</string>
     <string name="search_your_stop">Entre le nom de ton arrêt</string>
+    <string name="time_to_prochain_passage">Oups ! Pas d\'horaire disponible...</string>
 </resources>
