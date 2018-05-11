@@ -3,7 +3,6 @@ package android.miage.m1.uga.edu.tagreminder;
 import android.miage.m1.uga.edu.tagreminder.feature.accueil.HomeFragment;
 import android.miage.m1.uga.edu.tagreminder.feature.carte.MapFragment;
 import android.miage.m1.uga.edu.tagreminder.feature.favoris.FavoritesFragment;
-import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -11,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
         showFragment(new HomeFragment());
     }
 
+
     private void showFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.to_replace, fragment)
                 .commit();
     }
-
 }
