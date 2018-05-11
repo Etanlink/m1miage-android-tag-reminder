@@ -2,6 +2,7 @@ package android.miage.m1.uga.edu.tagreminder.feature.accueil.choisirArretParLign
 
 import android.content.Context;
 import android.miage.m1.uga.edu.tagreminder.R;
+import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragment;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
@@ -37,9 +38,12 @@ public class PickAStopFragment extends Fragment {
     private ArretItemClickListener arretItemClickListener = new ArretItemClickListener() {
         @Override
         public void onItemClick(Arret arret) {
-            Toast.makeText(getActivity(),"Click :  " + arret.toString(), Toast.LENGTH_LONG).show();
-
-            /* TODO : start a new fragment with the ligneTransport and stop informations */
+            CreateAReminderFragment createAReminderFragment = CreateAReminderFragment.newInstance(ligne, arret);
+            getActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.to_replace, createAReminderFragment)
+                    .addToBackStack(null)
+                    .commit();
         }
     };
 
@@ -76,7 +80,7 @@ public class PickAStopFragment extends Fragment {
 
         recyclerView.setAdapter(arretAdapter);
 
-        getData();
+        fetchStopData();
 
         return view;
     }
@@ -91,12 +95,12 @@ public class PickAStopFragment extends Fragment {
         super.onDetach();
     }
 
-    public void getData() {
+    public void fetchStopData() {
         dataList.clear();
 
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
-        Call<List<Arret>> call = service.getArretsOfALigne(ligne.getId());
+        Call<List<Arret>> call = service.getArretsByALigne(ligne.getId());
 
         Log.wtf("URL called", call.request().url() + "");
 
@@ -111,7 +115,6 @@ public class PickAStopFragment extends Fragment {
                     for (Arret arret : response.body()){
                         dataList.add(arret);
                     }
-                    /* TODO : sort the list ascending */
                     arretAdapter.notifyDataSetChanged();
                 }
             }
