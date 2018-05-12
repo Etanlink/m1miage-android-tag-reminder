@@ -287,14 +287,14 @@ public class CreateAReminderFragment extends Fragment {
         SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
         Gson gson = new Gson();
 
-        Log.wtf("Favoris ajouté", "fav" + favoriteToAdd.toString());
-        sharedPreferences.edit().putString("fav" + favoriteToAdd.toString(), gson.toJson(favoriteToAdd)).apply();
+        Log.wtf("Favoris ajouté", favoriteToAdd.toString());
+        sharedPreferences.edit().putString(favoriteToAdd.toString(), gson.toJson(favoriteToAdd)).apply();
     }
 
     private void deleteFromFavorites(Favoris favoriteToDelete){
         SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
 
-        Log.wtf("Favoris supprimé", "fav" + favoriteToDelete.toString());
-        sharedPreferences.edit().remove("fav" + favoriteToDelete.toString()).apply();
+        Log.wtf("Favoris supprimé", favoriteToDelete.toString());
+        sharedPreferences.edit().remove(favoriteToDelete.toString()).apply();
     }
 }

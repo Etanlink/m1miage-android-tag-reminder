@@ -26,10 +26,9 @@ public class Favoris implements Serializable {
 
     @Override
     public String toString() {
-        return "Favoris{" +
-                "arret=" + arret +
-                ", ligne=" + ligne +
-                ", direction=" + direction +
-                '}';
+        return "Favoris : " +
+                arret.getName() + " " +
+                ligne.getShortName() + " " +
+                direction;
     }
 }

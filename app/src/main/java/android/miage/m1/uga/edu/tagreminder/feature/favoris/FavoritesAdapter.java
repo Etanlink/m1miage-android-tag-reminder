@@ -11,6 +11,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -84,6 +86,8 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
         TextView txt_stop_name, txt_direction;
         TextView shortNameTxt;
         CardView logoCard;
+        RelativeLayout viewBackground;
+        LinearLayout viewForeground;
 
         public FavoritesHolder(View view) {
             super(view);
@@ -91,6 +95,8 @@ public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.Favo
             txt_direction = (TextView) view.findViewById(R.id.txt_direction_favorites);
             shortNameTxt = (TextView) view.findViewById(R.id.txt_short_name_favorites);
             logoCard = (CardView) view.findViewById((R.id.crd_ligne_favorites));
+            viewBackground = view.findViewById(R.id.view_background);
+            viewForeground = view.findViewById(R.id.view_foreground);
         }
     }
 
