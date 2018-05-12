@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
-import android.miage.m1.uga.edu.tagreminder.MainActivity;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.Favoris;
@@ -14,7 +13,6 @@ import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.model.passage.Passage;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -35,6 +33,7 @@ import com.google.gson.Gson;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,10 +50,19 @@ public class CreateAReminderFragment extends Fragment {
 
     List<String> lignes = new ArrayList<String>();
     List<String> directions = new ArrayList<String>();
+    List<Favoris> favoritesList = new ArrayList<Favoris>();
 
     TextView txtProchainPassage;
     TextView txtPassageSuivant;
-    int direction;
+    String direction;
+
+    String timeToProchainPassage;
+    String timeToPassageSuivant;
+
+    CheckBox checkAddToFavorites;
+    CheckBox checkActivateReminder;
+
+    Favoris fav;
 
     public static CreateAReminderFragment newInstance(LigneTransport ligneToAdd, Arret arretToAdd) {
         // DEBUG
@@ -93,14 +101,18 @@ public class CreateAReminderFragment extends Fragment {
         txtProchainPassage = (TextView) view.findViewById(R.id.txt_time_to_prochain_passage);
         txtPassageSuivant = (TextView) view.findViewById((R.id.txt_time_to_prochain_prochain_passage));
 
+        checkActivateReminder = (CheckBox) view.findViewById(R.id.check_activer_rappel);
+        checkAddToFavorites = (CheckBox) view.findViewById(R.id.check_ajouter_favoris);
+
         Spinner spinLignes = (Spinner) view.findViewById(R.id.spin_lignes);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, lignes);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinLignes.setAdapter(adapter);
 
+        fetchFavorites();
         fetchPassageData(view);
 
-        initButtons(view);
+        initCheckBoxListener(view);
 
         return view;
     }
@@ -138,25 +150,53 @@ public class CreateAReminderFragment extends Fragment {
         });
     }
 
-    private void updateProchainPassageByDirection(int direction){
-        String timeToProchainPassage = String.valueOf(R.string.time_to_prochain_passage);
+    private void fetchFavorites(){
+        favoritesList.clear();
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        Map<String, ?> map = sharedPreferences.getAll();
+        for(Map.Entry<String, ?> entry : map.entrySet()){
+            favoritesList.add(gson.fromJson(String.valueOf(entry.getValue()), Favoris.class));
+            Log.wtf("Item favoritesList", String.valueOf(entry.getValue()));
+        }
+    }
+
+    private boolean isFavorite(Favoris favorisToCheck){
+        boolean res = false;
+        for(Favoris favoris : favoritesList){
+            if(favorisToCheck.getArret().toString().equals(favoris.getArret().toString())
+                    && favorisToCheck.getLigne().toString().equals(favoris.getLigne().toString())
+                    && favorisToCheck.getDirection().equals(favoris.getDirection())){
+                Log.wtf("Favoris équivalent trouvé !", favoris.toString());
+                res = true;
+                break;
+            }
+        }
+        return res;
+    }
+
+    private void updateProchainPassageByDirection(String direction){
+        timeToProchainPassage = String.valueOf(R.string.time_to_prochain_passage);
         for(Passage passage : passages){
-            if((passage.getPattern().getDir().equals(direction)) && (passage.getTimes().get(0).getRealtimeArrival() != null)){
+            if((passage.getPattern().getDesc().toString().contains(direction)) && (passage.getTimes().get(0).getRealtimeArrival() != null)){
                 timeToProchainPassage = DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival());
                 break;
             }
         }
+        this.direction = direction;
         txtProchainPassage.setText(timeToProchainPassage);
     }
 
-    private void updatePassageSuivantByDirection(int direction){
-        String timeToPassageSuivant = String.valueOf(R.string.time_to_prochain_passage);
+    private void updatePassageSuivantByDirection(String direction){
+        timeToPassageSuivant = String.valueOf(R.string.time_to_prochain_passage);
         for(Passage passage : passages){
-            if((passage.getPattern().getDir().equals(direction)) && (passage.getTimes().size() > 1)){
+            if((passage.getPattern().getDesc().toString().contains(direction)) && (passage.getTimes().size() > 1)){
                 timeToPassageSuivant = DateUtils.formatElapsedTime(passage.getTimes().get(1).getRealtimeArrival());
                 break;
             }
         }
+        this.direction = direction;
         txtPassageSuivant.setText(timeToPassageSuivant);
     }
 
@@ -169,8 +209,11 @@ public class CreateAReminderFragment extends Fragment {
         spinDirections.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateProchainPassageByDirection(position + 1);
-                updatePassageSuivantByDirection(position + 1);
+                updateProchainPassageByDirection(directions.get(position));
+                updatePassageSuivantByDirection(directions.get(position));
+
+                fav = new Favoris(arret, ligne, directions.get(position));
+                toogleCheckFavorites(isFavorite(fav));
             }
 
             @Override
@@ -178,34 +221,30 @@ public class CreateAReminderFragment extends Fragment {
 
             }
         });
-
     }
 
     private void sendNotification(View view){
+        // TODO : parse the time in "15 min" for notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
         builder.setSmallIcon(R.drawable.ic_alarm_24dp);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
         builder.setContentIntent(pendingIntent);
         builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-        builder.setContentTitle("Prochain passage :");
-        builder.setContentText("15min");
-        builder.setSubText("30min");
+        builder.setContentTitle("Prochain passage : " + timeToProchainPassage);
+        builder.setContentText("Passage suivant : " + timeToPassageSuivant);
 
         NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(NOTIFICATION_SERVICE);
 
         notificationManager.notify(1, builder.build());
-
     }
 
     /** BUTTONS **/
 
-    private void initButtons(final View view) {
-        final CheckBox checkActivateReminder = (CheckBox) view.findViewById(R.id.check_activer_rappel);
+    private void initCheckBoxListener(final View view) {
         checkActivateReminder.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(checkActivateReminder.isChecked()){
-
                     // TODO : start a background service that udpate the next passages
                     sendNotification(view);
                 }
@@ -218,28 +257,44 @@ public class CreateAReminderFragment extends Fragment {
             }
         });
 
-        final CheckBox checkAddToFavorites = (CheckBox) view.findViewById(R.id.check_ajouter_favoris);
         checkAddToFavorites.setOnClickListener(new View.OnClickListener() {
-
-            Favoris favoris = null;
 
             public void onClick(View v) {
                 if(checkAddToFavorites.isChecked()){
-                    SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
-                    Gson gson = new Gson();
-
-                    favoris = new Favoris(arret, ligne, direction);
-
-                    sharedPreferences.edit()
-                            .putString("fav" + String.valueOf(favoris.hashCode()), gson.toJson(favoris))
-                            .apply();
+                    fav = new Favoris(arret, ligne, direction);
+                    addToFavorites(fav);
+                    fetchFavorites();
                 }
                 else{
-                    SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
-                    sharedPreferences.edit().remove("fav" + String.valueOf(favoris.hashCode()));
+                    deleteFromFavorites(fav);
+                    fetchFavorites();
                 }
             }
         });
 
+    }
+
+    private void toogleCheckFavorites(boolean favorite){
+        if(favorite == true){
+            checkAddToFavorites.setChecked(true);
+        }
+        else{
+            checkAddToFavorites.setChecked(false);
+        }
+    }
+
+    private void addToFavorites(Favoris favoriteToAdd){
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        Log.wtf("Favoris ajouté", "fav" + favoriteToAdd.toString());
+        sharedPreferences.edit().putString("fav" + favoriteToAdd.toString(), gson.toJson(favoriteToAdd)).apply();
+    }
+
+    private void deleteFromFavorites(Favoris favoriteToDelete){
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
+
+        Log.wtf("Favoris supprimé", "fav" + favoriteToDelete.toString());
+        sharedPreferences.edit().remove("fav" + favoriteToDelete.toString()).apply();
     }
 }
