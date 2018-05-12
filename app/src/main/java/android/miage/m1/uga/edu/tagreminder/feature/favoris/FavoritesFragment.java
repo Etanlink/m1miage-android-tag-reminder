@@ -99,7 +99,6 @@ public class FavoritesFragment extends Fragment implements FavoritesItemTouchHel
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         if (viewHolder instanceof FavoritesAdapter.FavoritesHolder) {
-            String name = favoritesList.get(viewHolder.getAdapterPosition()).toString();
 
             final Favoris deletedItem = favoritesList.get(viewHolder.getAdapterPosition());
             final int deletedIndex = viewHolder.getAdapterPosition();
@@ -107,7 +106,7 @@ public class FavoritesFragment extends Fragment implements FavoritesItemTouchHel
             favoritesAdapter.removeItem(viewHolder.getAdapterPosition());
             deleteFromFavorites(deletedItem);
 
-            Snackbar snackbar = Snackbar.make(linearLayout, name + " supprimé des favoris", Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(linearLayout, "Supprimé des favoris", Snackbar.LENGTH_LONG);
             snackbar.setAction("Annuler", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

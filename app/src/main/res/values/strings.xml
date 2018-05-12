@@ -16,4 +16,6 @@
     <string name="search_your_stop">Entre le nom de ton arrêt</string>
     <string name="time_to_prochain_passage">Oups ! Pas d\'horaire disponible...</string>
     <string name="delete">Supprimer</string>
+    <string name="google_maps_key">AIzaSyDQGEQxszQNa1IvhfqluTH8-n4W-qJzps0</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
