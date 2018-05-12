@@ -6,9 +6,9 @@ public class Favoris implements Serializable {
 
     private Arret arret;
     private LigneTransport ligne;
-    private int direction;
+    private String direction;
 
-    public Favoris(Arret arret, LigneTransport ligne, int direction) {
+    public Favoris(Arret arret, LigneTransport ligne, String direction) {
         this.arret = arret;
         this.ligne = ligne;
         this.direction = direction;
@@ -17,19 +17,18 @@ public class Favoris implements Serializable {
     /* GETTER */
     public Arret getArret() { return arret; }
     public LigneTransport getLigne() { return ligne; }
-    public int getDirection() { return direction; }
+    public String getDirection() { return direction; }
 
     /* SETTER */
     public void setArret(Arret arret) { this.arret = arret; }
     public void setLigne(LigneTransport ligne) { this.ligne = ligne; }
-    public void setDirection(int direction) { this.direction = direction; }
+    public void setDirection(String direction) { this.direction = direction; }
 
     @Override
     public String toString() {
-        return "Favoris{" +
-                "arret=" + arret +
-                ", ligne=" + ligne +
-                ", direction=" + direction +
-                '}';
+        return "Favoris : " +
+                arret.getName() + " " +
+                ligne.getShortName() + " " +
+                direction;
     }
 }

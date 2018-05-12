@@ -10,8 +10,10 @@
     <string name="ligne">Ligne</string>
     <string name="activer_rappel">Activer rappel</string>
     <string name="ajouter_favoris">Ajouter aux favoris</string>
+    <string name="favorites_title">Active un rappel !</string>
     <string name="prochain_passage">Prochain passage</string>
     <string name="passage_suivant">Passage suivant</string>
     <string name="search_your_stop">Entre le nom de ton arrêt</string>
     <string name="time_to_prochain_passage">Oups ! Pas d\'horaire disponible...</string>
+    <string name="delete">Supprimer</string>
 </resources>
