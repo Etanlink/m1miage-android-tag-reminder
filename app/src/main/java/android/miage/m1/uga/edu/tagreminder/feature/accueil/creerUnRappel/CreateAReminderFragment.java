@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.Favoris;
@@ -14,6 +15,7 @@ import android.miage.m1.uga.edu.tagreminder.model.passage.Passage;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.text.format.DateUtils;
@@ -30,6 +32,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +55,7 @@ public class CreateAReminderFragment extends Fragment {
     List<String> directions = new ArrayList<String>();
     List<Favoris> favoritesList = new ArrayList<Favoris>();
 
+    Spinner spinDirections;
     TextView txtLigneName;
     TextView txtProchainPassage;
     TextView txtPassageSuivant;
@@ -101,6 +105,8 @@ public class CreateAReminderFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinLignes.setAdapter(adapter);
 
+        spinDirections = (Spinner) view.findViewById((R.id.spin_directions));
+
         fetchFavorites();
         fetchPassageData(view);
         initCheckBoxListener(view);
@@ -135,8 +141,26 @@ public class CreateAReminderFragment extends Fragment {
             }
 
             public void onFailure(Call<List<Passage>> call, Throwable t) {
-                Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("ERROR: ", t.getMessage());
+                if (t instanceof IOException) {
+                    String message = "Pas de connexion internet";
+                    final Snackbar snackbar = Snackbar.make(getView().findViewById(R.id.create_reminder_content), message, Snackbar.LENGTH_INDEFINITE);
+                    snackbar.setAction("Réessayer", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(snackbar != null && snackbar.isShown()){
+                                snackbar.dismiss();
+                                fetchFavorites();
+                                fetchPassageData(view);
+                                initCheckBoxListener(view);
+                            }
+                        }
+                    });
+                    snackbar.setActionTextColor(Color.RED);
+                    snackbar.show();
+                }
+                else {
+                    Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -190,10 +214,9 @@ public class CreateAReminderFragment extends Fragment {
     }
 
     private void updateDirections(View view) {
-        Spinner spinDirections = (Spinner) view.findViewById((R.id.spin_directions));
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, directions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinDirections.setAdapter(adapter);
+        ArrayAdapter<String> directionAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, directions);
+        directionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinDirections.setAdapter(directionAdapter);
 
         spinDirections.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -215,13 +238,13 @@ public class CreateAReminderFragment extends Fragment {
     private void sendNotification(View view){
         // TODO : parse the time in "15 min" for notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(R.drawable.ic_alarm_24dp);
+        builder.setSmallIcon(R.drawable.ic_alarm_white_24dp);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
         builder.setContentIntent(pendingIntent);
         builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
         builder.setContentTitle("Prochain passage : " + timeToProchainPassage);
-        builder.setContentText("Passage suivant : " + timeToPassageSuivant);
+        builder.setContentText(ligne.getType() + " " + ligne.getShortName() + " - " + arret.getName());
 
         NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(NOTIFICATION_SERVICE);
 
@@ -233,7 +256,12 @@ public class CreateAReminderFragment extends Fragment {
             public void onClick(View v) {
                 if(checkActivateReminder.isChecked()){
                     // TODO : start a background service that udpate the next passages
-                    sendNotification(view);
+                    if(timeToPassageSuivant == null){
+                        checkActivateReminder.toggle();
+                    }
+                    else{
+                        sendNotification(view);
+                    }
                 }
                 else{
                     // TODO : kill the background service
@@ -258,7 +286,6 @@ public class CreateAReminderFragment extends Fragment {
                 }
             }
         });
-
     }
 
     private void toogleCheckFavorites(boolean favorite){

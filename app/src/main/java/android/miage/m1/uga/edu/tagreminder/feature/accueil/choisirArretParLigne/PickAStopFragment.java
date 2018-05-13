@@ -16,9 +16,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PickAStopFragment extends Fragment {
+
+    LinearLayout pickAStopContent;
+    LinearLayout noConnectivityContent;
 
     static LigneTransport ligne;
 
@@ -67,6 +72,17 @@ public class PickAStopFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_pick_a_stop, container, false);
+
+        pickAStopContent = (LinearLayout) view.findViewById(R.id.pick_a_stop_content);
+        noConnectivityContent = (LinearLayout) view.findViewById(R.id.no_connectivity_content);
+        noConnectivityContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                noConnectivityContent.setVisibility(v.INVISIBLE);
+                fetchStopData();
+                pickAStopContent.setVisibility(View.VISIBLE);
+            }
+        });
 
         TextView txtLigneName = (TextView) view.findViewById((R.id.txt_ligne_name));
         txtLigneName.setText(ligne.getMode() + " " + ligne.getShortName());
@@ -120,8 +136,13 @@ public class PickAStopFragment extends Fragment {
             }
 
             public void onFailure(Call<List<Arret>> call, Throwable t) {
-                Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("ERROR: ", t.getMessage());
+                if (t instanceof IOException) {
+                    pickAStopContent.setVisibility(View.INVISIBLE);
+                    noConnectivityContent.setVisibility(View.VISIBLE);
+                }
+                else {
+                    Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
