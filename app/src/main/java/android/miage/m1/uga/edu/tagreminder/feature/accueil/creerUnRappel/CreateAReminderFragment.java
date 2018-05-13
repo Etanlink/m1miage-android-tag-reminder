@@ -45,30 +45,25 @@ public class CreateAReminderFragment extends Fragment {
 
     static LigneTransport ligne;
     static Arret arret;
+    Favoris fav;
 
     List<Passage> passages = new ArrayList<Passage>();
-
     List<String> lignes = new ArrayList<String>();
     List<String> directions = new ArrayList<String>();
     List<Favoris> favoritesList = new ArrayList<Favoris>();
 
+    TextView txtLigneName;
     TextView txtProchainPassage;
     TextView txtPassageSuivant;
-    String direction;
-
-    String timeToProchainPassage;
-    String timeToPassageSuivant;
-
     CheckBox checkAddToFavorites;
     CheckBox checkActivateReminder;
 
-    Favoris fav;
+    String direction;
+    String timeToProchainPassage;
+    String timeToPassageSuivant;
+
 
     public static CreateAReminderFragment newInstance(LigneTransport ligneToAdd, Arret arretToAdd) {
-        // DEBUG
-        Log.wtf("Ligne récupérée", ligneToAdd.toString());
-        Log.wtf("Arrêt récupéré", arretToAdd.toString());
-
         Bundle args = new Bundle();
         args.putSerializable(ligneToAdd.getId(), (Serializable) ligneToAdd);
         args.putSerializable(arretToAdd.getCode(), (Serializable) arretToAdd);
@@ -86,16 +81,13 @@ public class CreateAReminderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         lignes.add(ligne.getType() + " " + ligne.getShortName());
-
-        setRetainInstance(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_create_a_reminder, container, false);
 
-        /* INIT */
-        TextView txtLigneName = (TextView) view.findViewById(R.id.txt_arret_name);
+        txtLigneName = (TextView) view.findViewById(R.id.txt_arret_name);
         txtLigneName.setText(arret.getName());
 
         txtProchainPassage = (TextView) view.findViewById(R.id.txt_time_to_prochain_passage);
@@ -111,7 +103,6 @@ public class CreateAReminderFragment extends Fragment {
 
         fetchFavorites();
         fetchPassageData(view);
-
         initCheckBoxListener(view);
 
         return view;
@@ -158,7 +149,6 @@ public class CreateAReminderFragment extends Fragment {
         Map<String, ?> map = sharedPreferences.getAll();
         for(Map.Entry<String, ?> entry : map.entrySet()){
             favoritesList.add(gson.fromJson(String.valueOf(entry.getValue()), Favoris.class));
-            Log.wtf("Item favoritesList", String.valueOf(entry.getValue()));
         }
     }
 
@@ -168,7 +158,6 @@ public class CreateAReminderFragment extends Fragment {
             if(favorisToCheck.getArret().toString().equals(favoris.getArret().toString())
                     && favorisToCheck.getLigne().toString().equals(favoris.getLigne().toString())
                     && favorisToCheck.getDirection().equals(favoris.getDirection())){
-                Log.wtf("Favoris équivalent trouvé !", favoris.toString());
                 res = true;
                 break;
             }
@@ -239,8 +228,6 @@ public class CreateAReminderFragment extends Fragment {
         notificationManager.notify(1, builder.build());
     }
 
-    /** BUTTONS **/
-
     private void initCheckBoxListener(final View view) {
         checkActivateReminder.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -286,15 +273,11 @@ public class CreateAReminderFragment extends Fragment {
     private void addToFavorites(Favoris favoriteToAdd){
         SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
         Gson gson = new Gson();
-
-        Log.wtf("Favoris ajouté", favoriteToAdd.toString());
         sharedPreferences.edit().putString(favoriteToAdd.toString(), gson.toJson(favoriteToAdd)).apply();
     }
 
     private void deleteFromFavorites(Favoris favoriteToDelete){
         SharedPreferences sharedPreferences = getContext().getSharedPreferences("PREFS", Context.MODE_PRIVATE);
-
-        Log.wtf("Favoris supprimé", favoriteToDelete.toString());
         sharedPreferences.edit().remove(favoriteToDelete.toString()).apply();
     }
 }
