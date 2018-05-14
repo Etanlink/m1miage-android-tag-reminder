@@ -218,6 +218,8 @@ public class CreateAReminderFragment extends Fragment {
         directionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinDirections.setAdapter(directionAdapter);
 
+        Log.wtf("Spinner directions", String.valueOf(directions.size()));
+
         spinDirections.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
