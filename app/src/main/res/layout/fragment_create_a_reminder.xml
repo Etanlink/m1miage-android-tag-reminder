@@ -41,7 +41,7 @@
             android:id="@+id/txt_ligne"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:gravity="left"
             android:text="@string/ligne"
             android:textAlignment="gravity" />
@@ -67,7 +67,7 @@
             android:id="@+id/txt_direction_ligne"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:gravity="left"
             android:text="Direction"
             android:textAlignment="gravity" />
