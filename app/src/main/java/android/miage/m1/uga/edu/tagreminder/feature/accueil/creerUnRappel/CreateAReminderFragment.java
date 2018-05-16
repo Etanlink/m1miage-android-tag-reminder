@@ -1,5 +1,6 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -12,9 +13,11 @@ import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.Favoris;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.model.passage.Passage;
+import android.miage.m1.uga.edu.tagreminder.network.AlarmReceiver;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -35,6 +38,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -46,26 +50,28 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class CreateAReminderFragment extends Fragment {
 
-    static LigneTransport ligne;
-    static Arret arret;
-    Favoris fav;
+    private static LigneTransport ligne;
+    private static Arret arret;
+    private Favoris fav;
 
-    List<Passage> passages = new ArrayList<Passage>();
-    List<String> lignes = new ArrayList<String>();
-    List<String> directions = new ArrayList<String>();
-    List<Favoris> favoritesList = new ArrayList<Favoris>();
+    private List<Passage> passages = new ArrayList<Passage>();
+    private List<String> lignes = new ArrayList<String>();
+    private List<String> directions = new ArrayList<String>();
+    private List<Favoris> favoritesList = new ArrayList<Favoris>();
 
-    Spinner spinDirections;
-    TextView txtLigneName;
-    TextView txtProchainPassage;
-    TextView txtPassageSuivant;
-    CheckBox checkAddToFavorites;
-    CheckBox checkActivateReminder;
+    private Spinner spinDirections;
+    private TextView txtLigneName;
+    private TextView txtProchainPassage;
+    private TextView txtPassageSuivant;
+    private CheckBox checkAddToFavorites;
+    private CheckBox checkActivateReminder;
 
-    String direction;
-    String timeToProchainPassage;
-    String timeToPassageSuivant;
+    private String direction;
+    private String timeToProchainPassage;
+    private String timeToPassageSuivant;
 
+    private Intent alarmIntent;
+    private PendingIntent pendingIntent;
 
     public static CreateAReminderFragment newInstance(LigneTransport ligneToAdd, Arret arretToAdd) {
         Bundle args = new Bundle();
@@ -85,6 +91,10 @@ public class CreateAReminderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         lignes.add(ligne.getType() + " " + ligne.getShortName());
+
+        /* Retrieve a PendingIntent that will perform a broadcast */
+        Intent alarmIntent = new Intent(getActivity(), AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, alarmIntent, 0);
     }
 
     @Override
@@ -109,7 +119,7 @@ public class CreateAReminderFragment extends Fragment {
 
         fetchFavorites();
         fetchPassageData(view);
-        initCheckBoxListener(view);
+        initCheckBoxListener();
 
         return view;
     }
@@ -151,7 +161,7 @@ public class CreateAReminderFragment extends Fragment {
                                 snackbar.dismiss();
                                 fetchFavorites();
                                 fetchPassageData(view);
-                                initCheckBoxListener(view);
+                                initCheckBoxListener();
                             }
                         }
                     });
@@ -218,8 +228,6 @@ public class CreateAReminderFragment extends Fragment {
         directionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinDirections.setAdapter(directionAdapter);
 
-        Log.wtf("Spinner directions", String.valueOf(directions.size()));
-
         spinDirections.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -237,23 +245,7 @@ public class CreateAReminderFragment extends Fragment {
         });
     }
 
-    private void sendNotification(View view){
-        // TODO : parse the time in "15 min" for notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
-        builder.setSmallIcon(R.drawable.ic_alarm_white_24dp);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
-        builder.setContentIntent(pendingIntent);
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-        builder.setContentTitle("Prochain passage : " + timeToProchainPassage);
-        builder.setContentText(ligne.getType() + " " + ligne.getShortName() + " - " + arret.getName());
-
-        NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(NOTIFICATION_SERVICE);
-
-        notificationManager.notify(1, builder.build());
-    }
-
-    private void initCheckBoxListener(final View view) {
+    private void initCheckBoxListener() {
         checkActivateReminder.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(checkActivateReminder.isChecked()){
@@ -262,14 +254,15 @@ public class CreateAReminderFragment extends Fragment {
                         checkActivateReminder.toggle();
                     }
                     else{
-                        sendNotification(view);
+                        // DEBUG
+                        // startReminder();
+                        initNotification();
+                        // DEBUG
                     }
                 }
                 else{
                     // TODO : kill the background service
-                    String ns = Context.NOTIFICATION_SERVICE;
-                    NotificationManager nMgr = (NotificationManager) getContext().getSystemService(ns);
-                    nMgr.cancel(1);
+                    cancelReminder();
                 }
             }
         });
@@ -288,6 +281,46 @@ public class CreateAReminderFragment extends Fragment {
                 }
             }
         });
+    }
+
+    public void startReminder() {
+        alarmIntent = new Intent(getContext(), AlarmReceiver.class);
+        alarmIntent.putExtra("ligne", ligne);
+        alarmIntent.putExtra("arret", arret);
+        alarmIntent.putExtra("direction", direction);
+
+        pendingIntent = PendingIntent.getBroadcast(getActivity(), 1, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 30);
+        AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), calendar.getTimeInMillis(), pendingIntent);
+
+        initNotification();
+
+        Toast.makeText(getActivity(), "Suivi activé", Toast.LENGTH_SHORT).show();
+    }
+
+    private void initNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
+        builder.setSmallIcon(R.drawable.ic_alarm_white_24dp);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+        builder.setContentIntent(pendingIntent);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+        builder.setContentTitle("Prochain passage : " + timeToProchainPassage);
+        builder.setContentText(ligne.getType() + " " + ligne.getShortName() + " - " + arret.getName());
+
+        NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(1, builder.build());
+    }
+
+    public void cancelReminder() {
+        AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pendingIntent);
+
+        Toast.makeText(getActivity(), "Suivi désactivé", Toast.LENGTH_SHORT).show();
     }
 
     private void toogleCheckFavorites(boolean favorite){
