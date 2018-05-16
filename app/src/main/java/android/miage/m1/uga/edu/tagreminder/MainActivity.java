@@ -45,11 +45,12 @@ public class MainActivity extends AppCompatActivity {
         showFragment(new HomeFragment());
     }
 
-
     private void showFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.to_replace, fragment)
-                .commit();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.transition.enter_from_bottom, R.transition.exit_to_top);
+        transaction.replace(R.id.to_replace, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

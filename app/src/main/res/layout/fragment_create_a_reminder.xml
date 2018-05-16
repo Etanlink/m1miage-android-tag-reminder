@@ -40,7 +40,7 @@
             android:id="@+id/txt_ligne"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:gravity="left"
             android:text="@string/ligne"
             android:textAlignment="gravity" />
@@ -66,7 +66,7 @@
             android:id="@+id/txt_direction_ligne"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:gravity="left"
             android:text="Direction"
             android:textAlignment="gravity" />
@@ -117,7 +117,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/time_to_prochain_passage"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -161,7 +162,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/time_to_prochain_passage"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 

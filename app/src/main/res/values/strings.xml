@@ -4,13 +4,14 @@
     <string name="title_map">Carte</string>
     <string name="title_favorites">Favoris</string>
     <string name="pick_a_stop">Choisir un arrêt</string>
-    <string name="pick_a_line">Choisissez une ligne</string>
+    <string name="pick_a_line">Choisir une ligne</string>
     <string name="action_title">Choisis ton arrêt ou ta ligne</string>
     <string name="stop">Arrêt</string>
     <string name="ligne">Ligne</string>
     <string name="activer_rappel">Activer rappel</string>
     <string name="ajouter_favoris">Ajouter aux favoris</string>
     <string name="favorites_title">Active un rappel !</string>
+    <string name="favorites_subtitle">Ou ajoute des favoris :)</string>
     <string name="prochain_passage">Prochain passage</string>
     <string name="passage_suivant">Passage suivant</string>
     <string name="search_your_stop">Entre le nom de ton arrêt</string>

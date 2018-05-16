@@ -8,6 +8,7 @@ import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,11 +48,11 @@ public class HomeFragment extends Fragment {
         @Override
         public void onItemClick(LigneTransport ligneTransport) {
             PickAStopFragment pickAStopFragment = PickAStopFragment.newInstance(ligneTransport);
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.to_replace, pickAStopFragment)
-                    .addToBackStack(null)
-                    .commit();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.transition.enter_from_right, R.transition.exit_to_left);
+            transaction.replace(R.id.to_replace, pickAStopFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
     };
 

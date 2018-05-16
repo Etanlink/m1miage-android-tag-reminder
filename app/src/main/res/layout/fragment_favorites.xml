@@ -17,11 +17,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="10dp"
         android:gravity="center"
         android:text="@string/favorites_title"
         android:textSize="20sp"
         android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txt_pick_a_line"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/favorites_subtitle"
+        android:textSize="15sp" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_favorites"
