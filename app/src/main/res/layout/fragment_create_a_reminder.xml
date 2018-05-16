@@ -118,7 +118,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/time_to_prochain_passage"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -162,7 +163,8 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="@string/time_to_prochain_passage"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
