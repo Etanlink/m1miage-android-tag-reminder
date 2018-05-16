@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
@@ -46,8 +47,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void showFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.to_replace, fragment)
-                .commit();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(R.transition.enter_from_bottom, R.transition.exit_to_top);
+        transaction.replace(R.id.to_replace, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }
