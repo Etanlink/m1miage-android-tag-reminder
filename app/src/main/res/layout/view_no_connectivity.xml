@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/no_connectivity_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:orientation="vertical"
+    android:visibility="invisible"
+    android:clickable="true"
+    tools:layout_editor_absoluteY="81dp">
+
+    <ImageView
+        android:id="@+id/img_no_connectivity"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/ic_no_connectivity_24dp"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="135dp" />
+
+    <TextView
+        android:id="@+id/txt_no_connectivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginBottom="5dp"
+        android:text="@string/no_connectivity"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txt_tap_to_retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:layout_weight="1"
+        android:text="@string/retry"
+        android:textSize="14sp"
+        android:layout_gravity="center"
+        android:textAlignment="center"/>
+
+</LinearLayout>

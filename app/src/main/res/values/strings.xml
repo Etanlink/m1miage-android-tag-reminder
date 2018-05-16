@@ -19,4 +19,6 @@
     <string name="delete">Supprimer</string>
     <string name="google_maps_key">AIzaSyDQGEQxszQNa1IvhfqluTH8-n4W-qJzps0</string>
     <string name="title_activity_maps">Map</string>
+    <string name="no_connectivity">Pas de connexion</string>
+    <string name="retry">Appuyer pour réessayer</string>
 </resources>

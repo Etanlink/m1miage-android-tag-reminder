@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="5dp"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
-    android:layout_marginTop="5dp"
-    android:orientation="vertical">
+    android:layout_marginTop="5dp">
 
-    <TextView
-        android:id="@+id/txt_ligne_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+    <include layout="@layout/view_no_connectivity"/>
 
-    <TextView
-        android:id="@+id/txt_pick_a_stop"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pick_a_stop_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -28,11 +19,31 @@
         android:text="@string/pick_a_stop"
         android:textSize="15sp" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_fragment_pick_a_stop"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="true"
-        android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
+        <TextView
+            android:id="@+id/txt_ligne_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/txt_pick_a_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/pick_a_stop"
+            android:textSize="15sp" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_fragment_pick_a_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="true"
+            android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
+
+    </LinearLayout>
+
+</FrameLayout>

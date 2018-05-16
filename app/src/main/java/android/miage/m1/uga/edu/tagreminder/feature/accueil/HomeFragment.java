@@ -16,8 +16,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,6 +30,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
+
+    LinearLayout homeContent;
+    LinearLayout noConnectivityContent;
 
     RecyclerView tramListRecyclerView;
     RecyclerView busListRecyclerView;
@@ -65,13 +70,24 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        homeContent = (LinearLayout) view.findViewById(R.id.home_content);
+        noConnectivityContent = (LinearLayout) view.findViewById(R.id.no_connectivity_content);
+        noConnectivityContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                noConnectivityContent.setVisibility(v.INVISIBLE);
+                fetchLigneTransportData();
+                homeContent.setVisibility(View.VISIBLE);
+            }
+        });
+
         initRecyclerView(view);
+        fetchLigneTransportData();
 
         return view;
     }
 
     private void initRecyclerView(View view) {
-
         tramListRecyclerView = (RecyclerView) view.findViewById(R.id.tram_recycler_view);
         busListRecyclerView = (RecyclerView) view.findViewById(R.id.bus_recycler_view);
 
@@ -90,7 +106,6 @@ public class HomeFragment extends Fragment {
         tramListRecyclerView.setAdapter(tramListTransportAdapter);
         busListRecyclerView.setAdapter(busListTransportAdapter);
 
-        fetchLigneTransportData();
     }
 
     @Override
@@ -103,7 +118,7 @@ public class HomeFragment extends Fragment {
         super.onDetach();
     }
 
-    public void fetchLigneTransportData() {
+    private void fetchLigneTransportData() {
         tramList.clear();
         busList.clear();
         chronoList.clear();
@@ -144,13 +159,18 @@ public class HomeFragment extends Fragment {
             }
 
             public void onFailure(Call<List<LigneTransport>> call, Throwable t) {
-                Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                Log.e("ERROR: ", t.getMessage());
+                if (t instanceof IOException) {
+                    homeContent.setVisibility(View.INVISIBLE);
+                    noConnectivityContent.setVisibility(View.VISIBLE);
+                }
+                else {
+                    Toast.makeText(getActivity(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
 
-    public List<LigneTransport> sortData(List<LigneTransport> listToSort){
+    private List<LigneTransport> sortData(List<LigneTransport> listToSort){
         Collections.sort(listToSort, new Comparator<LigneTransport>() {
             @Override
             public int compare(LigneTransport o1, LigneTransport o2) {
@@ -159,5 +179,4 @@ public class HomeFragment extends Fragment {
         });
         return listToSort;
     }
-
 }
