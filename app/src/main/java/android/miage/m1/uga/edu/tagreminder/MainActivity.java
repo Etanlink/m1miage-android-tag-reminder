@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         showFragment(new HomeFragment());
     }
 
-
     private void showFragment(Fragment fragment){
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()

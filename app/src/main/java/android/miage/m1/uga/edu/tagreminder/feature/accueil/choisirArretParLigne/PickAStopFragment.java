@@ -9,6 +9,7 @@ import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
 import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,11 +40,11 @@ public class PickAStopFragment extends Fragment {
         @Override
         public void onItemClick(Arret arret) {
             CreateAReminderFragment createAReminderFragment = CreateAReminderFragment.newInstance(ligne, arret);
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.to_replace, createAReminderFragment)
-                    .addToBackStack(null)
-                    .commit();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.transition.enter_from_right, R.transition.exit_to_left);
+            transaction.replace(R.id.to_replace, createAReminderFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
     };
 
