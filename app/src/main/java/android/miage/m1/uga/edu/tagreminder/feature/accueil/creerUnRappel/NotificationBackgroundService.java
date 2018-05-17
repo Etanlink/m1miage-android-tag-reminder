@@ -1,24 +1,41 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.miage.m1.uga.edu.tagreminder.R;
-import android.miage.m1.uga.edu.tagreminder.model.Arret;
-import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
+import android.miage.m1.uga.edu.tagreminder.model.passage.Passage;
+import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
+import android.miage.m1.uga.edu.tagreminder.network.api.MetromobiliteAPI;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
+import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
+
+import java.io.IOException;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NotificationBackgroundService extends IntentService {
 
-    private LigneTransport ligne;
-    private Arret arret;
+    private String ligneId;
+    private String ligneType;
+    private String ligneShortName;
+    private String arretName;
+    private String arretCode;
     private String direction;
+
+    private String timeToProchainPassage;
 
     public NotificationBackgroundService() {
         super("NotificationBackgroundService");
@@ -26,33 +43,81 @@ public class NotificationBackgroundService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        this.ligne = (LigneTransport) intent.getSerializableExtra("ligne");
-        this.arret = (Arret) intent.getSerializableExtra("arret");
-        this.direction = intent.getStringExtra("drection");
+        this.ligneId = intent.getStringExtra("ligneId");
+        this.ligneType = intent.getStringExtra("ligneType");
+        this.ligneShortName = intent.getStringExtra("ligneShortName");
+        this.arretName = intent.getStringExtra("arretName");
+        this.arretCode = intent.getStringExtra("arretCode");
+        this.direction = intent.getStringExtra("direction");
 
-        Log.wtf("Service notification", ligne.getId() + " " + arret.getName() + " " + direction);
+        refreshNotification();
     }
 
-//    private void sendNotification() {
-//        // TODO : setStyle for custom notification
-//        // TODO : parse the time in "15 min" for notification
-//
-//        PendingIntent stopAlarmIntent = null;
-//        Notification notification = new NotificationCompat().Builder()
-//                // Show controls on lock screen even when user hides sensitive content.
-//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-//                .setSmallIcon(R.drawable.ic_alarm_white_24dp)
-//                // Add media control buttons that invoke intents in your media service
-//                .addAction(R.drawable.ic_alarm_off_24dp, "Stop", stopAlarmIntent) // #0
-//                .setContentTitle("Coucou")
-//                .setContentText("Prochain passage dans XX min")
-//                .setAutoCancel(true)
-//                .build();
-//
-//        NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-//        notificationManager.notify(1,notification);
-//
-//        Log.wtf("Alarme activé", "Temps : " + SystemClock.currentThreadTimeMillis());
-//
-//    }
+    private void refreshNotification() {
+        // TODO : get data through Retrofit
+        fetchPassageData();
+        // TODO : handle the null case for the Time
+    }
+
+    private String fetchPassageData() {
+
+        MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
+
+        Call<List<Passage>> call = service.getPassageByAStop(arretCode);
+
+        Log.wtf("URL called", call.request().url() + "");
+
+        call.enqueue(new Callback<List<Passage>>() {
+            @Override
+            public void onResponse(Call<List<Passage>> call, Response<List<Passage>> response) {
+                if (response==null){
+                    Toast.makeText(getApplication(), "Something Went Wrong...!!", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    for (Passage passage : response.body()){
+                        if(passage.getPattern().getId().contains(ligneId) && passage.getPattern().getDesc().contains(direction)){
+                            if((passage.getTimes().get(0).getRealtimeArrival() != null)){
+                                timeToProchainPassage = DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival());
+                            }
+                        }
+                    }
+                    if(timeToProchainPassage.equals(null)){
+                        timeToProchainPassage = "Oups, pas de passage pour l'instant.";
+                    }
+                    sendNotification();
+                }
+            }
+
+            public void onFailure(Call<List<Passage>> call, Throwable t) {
+                if (t instanceof IOException) {
+                    timeToProchainPassage = "Oups, pas de connexion internet.";
+                }
+                else {
+                    Toast.makeText(getApplication(), "Unable to fetch json: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        return timeToProchainPassage;
+    }
+
+    private void sendNotification() {
+        // TODO : setStyle for custom notification
+        // TODO : parse the time in "15 min" for notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+        builder.setSmallIcon(R.drawable.ic_alarm_white_24dp);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplication(), 0, intent, 0);
+        builder.setContentIntent(pendingIntent);
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+        builder.setContentTitle("Prochain passage : " + this.timeToProchainPassage);
+        builder.setContentText(ligneType + " " + ligneShortName + " - " + arretName);
+
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(1, builder.build());
+
+        Log.wtf("Alarme activé", "Temps : " + SystemClock.currentThreadTimeMillis());
+
+    }
 }

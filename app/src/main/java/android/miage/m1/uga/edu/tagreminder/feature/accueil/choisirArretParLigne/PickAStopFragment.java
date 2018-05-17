@@ -1,8 +1,10 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil.choisirArretParLigne;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragment;
+import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragmentRefactor;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
@@ -42,12 +44,13 @@ public class PickAStopFragment extends Fragment {
     List<Arret> dataList = new ArrayList<Arret>();
 
     private ArretItemClickListener arretItemClickListener = new ArretItemClickListener() {
+        @SuppressLint("ResourceType")
         @Override
         public void onItemClick(Arret arret) {
-            CreateAReminderFragment createAReminderFragment = CreateAReminderFragment.newInstance(ligne, arret);
+            CreateAReminderFragmentRefactor createAReminderFragmentRefactor = CreateAReminderFragmentRefactor.newInstance(ligne, arret);
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.transition.enter_from_right, R.transition.exit_to_left);
-            transaction.replace(R.id.to_replace, createAReminderFragment);
+            transaction.replace(R.id.to_replace, createAReminderFragmentRefactor);
             transaction.addToBackStack(null);
             transaction.commit();
         }
