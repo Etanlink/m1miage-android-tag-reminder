@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragment;
-import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragmentRefactor;
 import android.miage.m1.uga.edu.tagreminder.model.Arret;
 import android.miage.m1.uga.edu.tagreminder.model.LigneTransport;
 import android.miage.m1.uga.edu.tagreminder.network.RetrofitInstance;
@@ -47,10 +46,10 @@ public class PickAStopFragment extends Fragment {
         @SuppressLint("ResourceType")
         @Override
         public void onItemClick(Arret arret) {
-            CreateAReminderFragmentRefactor createAReminderFragmentRefactor = CreateAReminderFragmentRefactor.newInstance(ligne, arret);
+            CreateAReminderFragment createAReminderFragment = CreateAReminderFragment.newInstance(ligne, arret);
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.setCustomAnimations(R.transition.enter_from_right, R.transition.exit_to_left);
-            transaction.replace(R.id.to_replace, createAReminderFragmentRefactor);
+            transaction.replace(R.id.to_replace, createAReminderFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         }
@@ -101,6 +100,8 @@ public class PickAStopFragment extends Fragment {
         recyclerView.setAdapter(arretAdapter);
 
         fetchStopData();
+        /* Fetch the alert for the given stop */
+        fetchAlert();
 
         return view;
     }
@@ -149,6 +150,10 @@ public class PickAStopFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void fetchAlert() {
+        // TODO : Avertir l'utilisateur lorsqu'un incident se produit impactant la ligne surveillée. Utilisez l'API "Données dynamiques" avec le paramètre evtTC.
     }
 
 }

@@ -33,7 +33,7 @@
         </activity>
 
         <service android:name=".feature.accueil.creerUnRappel.NotificationBackgroundService" />
-        <receiver android:name=".network.AlarmReceiver"></receiver>
+        <receiver android:name=".feature.accueil.creerUnRappel.AlarmReceiver"></receiver>
 
     </application>
 

@@ -61,6 +61,8 @@ public class NotificationBackgroundService extends IntentService {
 
     private String fetchPassageData() {
 
+        Log.wtf("fetch", "fetch data !");
+
         MetromobiliteAPI service = RetrofitInstance.getRetrofitInstance().create(MetromobiliteAPI.class);
 
         Call<List<Passage>> call = service.getPassageByAStop(arretCode);
@@ -77,11 +79,11 @@ public class NotificationBackgroundService extends IntentService {
                     for (Passage passage : response.body()){
                         if(passage.getPattern().getId().contains(ligneId) && passage.getPattern().getDesc().contains(direction)){
                             if((passage.getTimes().get(0).getRealtimeArrival() != null)){
-                                timeToProchainPassage = DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival());
+                                timeToProchainPassage = getTimeInMinutes(DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival()));
                             }
                         }
                     }
-                    if(timeToProchainPassage.equals(null)){
+                    if(timeToProchainPassage == null){
                         timeToProchainPassage = "Oups, pas de passage pour l'instant.";
                     }
                     sendNotification();
@@ -102,7 +104,6 @@ public class NotificationBackgroundService extends IntentService {
     }
 
     private void sendNotification() {
-        // TODO : setStyle for custom notification
         // TODO : parse the time in "15 min" for notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
         builder.setSmallIcon(R.drawable.ic_alarm_white_24dp);
@@ -116,8 +117,12 @@ public class NotificationBackgroundService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(NOTIFICATION_SERVICE);
 
         notificationManager.notify(1, builder.build());
+    }
 
-        Log.wtf("Alarme activé", "Temps : " + SystemClock.currentThreadTimeMillis());
+    private String getTimeInMinutes(String timeToParse) {
 
+        // TODO : get the remaining time in minutes if less than an hour (ex : 45min), else get the realtime in hour (ex : 6h05)
+
+        return timeToParse;
     }
 }
