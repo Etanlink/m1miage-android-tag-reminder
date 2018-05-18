@@ -1,9 +1,13 @@
 package android.miage.m1.uga.edu.tagreminder.feature.favoris;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.miage.m1.uga.edu.tagreminder.R;
+import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.AlarmReceiver;
 import android.miage.m1.uga.edu.tagreminder.model.Favoris;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -18,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -33,10 +38,18 @@ public class FavoritesFragment extends Fragment implements FavoritesItemTouchHel
 
     FavoritesAdapter favoritesAdapter;
 
+    private Intent alarmIntent;
+    private PendingIntent pendingIntent;
+
     private FavoritesItemClickListener favoritesItemClickListener = new FavoritesItemClickListener() {
         @Override
         public void onItemClick(Favoris favoris) {
-
+            if(pendingIntent == null){
+                startReminder(favoris);
+            }
+            else {
+                cancelReminder(favoris);
+            }
         }
     };
 
@@ -134,5 +147,35 @@ public class FavoritesFragment extends Fragment implements FavoritesItemTouchHel
         Log.wtf("Favoris supprimé", favoriteToDelete.toString());
         sharedPreferences.edit().remove(favoriteToDelete.toString()).apply();
         fetchFavorites();
+    }
+
+    public void startReminder(Favoris favoris) {
+        if(pendingIntent != null){
+            AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+            alarm.cancel(pendingIntent);
+        }
+
+        alarmIntent = new Intent(getContext(), AlarmReceiver.class);
+        alarmIntent.putExtra("ligneId", favoris.getLigne().getId());
+        alarmIntent.putExtra("ligneType", favoris.getLigne().getType());
+        alarmIntent.putExtra("ligneShortName", favoris.getLigne().getShortName());
+        alarmIntent.putExtra("arretName", favoris.getArret().getName());
+        alarmIntent.putExtra("arretCode", favoris.getArret().getCode());
+        alarmIntent.putExtra("direction", favoris.getDirection());
+
+        pendingIntent = PendingIntent.getBroadcast(getActivity(), 1, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int interval = 30 * 1000; // 30 seconds
+        AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+
+        Toast.makeText(getActivity(), "Suivi activé", Toast.LENGTH_SHORT).show();
+    }
+
+    public void cancelReminder(Favoris favoris) {
+        AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pendingIntent);
+
+        Toast.makeText(getActivity(), "Suivi désactivé", Toast.LENGTH_SHORT).show();
     }
 }

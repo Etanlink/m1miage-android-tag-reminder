@@ -1,8 +1,12 @@
 package android.miage.m1.uga.edu.tagreminder.feature.favoris;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.miage.m1.uga.edu.tagreminder.R;
+import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.AlarmReceiver;
 import android.miage.m1.uga.edu.tagreminder.model.Favoris;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -11,9 +15,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 

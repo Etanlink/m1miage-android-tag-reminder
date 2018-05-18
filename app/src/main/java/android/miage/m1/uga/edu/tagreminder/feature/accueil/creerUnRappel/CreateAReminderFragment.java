@@ -36,6 +36,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -133,6 +134,7 @@ public class CreateAReminderFragment extends Fragment {
                     @RequiresApi(api = Build.VERSION_CODES.M)
                     @Override
                     public void onRefresh() {
+                        // TODO : keep the current ligne and direction
                         /* Fetch favorites and check if the selected passage is a favorite or not */
                         fetchFavorites();
                         /* Fetch passages */
@@ -198,8 +200,9 @@ public class CreateAReminderFragment extends Fragment {
                 }
                 else {
                     for (Passage passage : response.body()){
-                        passages.add(passage);
-                        Log.wtf("Passage récupéré", passage.getPattern().getId() + " " + passage.getPattern().getDesc());
+                        if(passage.getPattern().getId().contains("SEM")){
+                            passages.add(passage);
+                        }
                     }
 
                     if(passages.size() > 0){
@@ -247,13 +250,16 @@ public class CreateAReminderFragment extends Fragment {
     }
 
     private void updateLignes() {
-        // TODO : init spinLignes with ligne given and fill it with lignes gathered
         String [] splitedString;
         for(Passage passage : passages){
+            Log.wtf("Passage", passage.getPattern().getId());
             if(!passage.getPattern().getId().contains(ligne.getId())){
                 // split the id to only get the ligne name
                 splitedString = passage.getPattern().getId().split(":");
-                lignes.add(splitedString[1]);
+
+                if(!lignes.containsAll(Collections.singleton(splitedString[1]))){
+                    lignes.add(splitedString[1]);
+                }
             }
         }
         ArrayAdapter<String> ligneAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_dropdown_item, lignes);
@@ -294,6 +300,7 @@ public class CreateAReminderFragment extends Fragment {
 
                 fav = new Favoris(arret, ligne, directions.get(position));
                 toogleCheckFavorites(isFavorite(fav));
+                toggleCheckReminder();
             }
 
             @Override
@@ -305,16 +312,15 @@ public class CreateAReminderFragment extends Fragment {
 
     private void updateTimePassagesByDirection(String selectedDirection) {
 
-        timeToProchainPassage = String.valueOf(R.string.time_to_prochain_passage);
-        timeToPassageSuivant = String.valueOf(R.string.time_to_prochain_passage);
+        timeToProchainPassage = "Pas d\'horaire disponible...";
+        timeToPassageSuivant = "Pas d\'horaire disponible...";
 
         for(Passage passage : passages){
             if(passage.getPattern().getId().contains(selectedLigne) && passage.getPattern().getDesc().toString().contains(selectedDirection)){
                 if(passage.getTimes().get(0).getRealtimeArrival() != null){
                     timeToProchainPassage = getTimeInMinutes(DateUtils.formatElapsedTime(passage.getTimes().get(0).getRealtimeArrival()));
                 }
-                // TODO : check if the second time is not more than the amount of millis in a day
-                if(passage.getTimes().size() > 1 && passage.getTimes().get(1).getRealtimeArrival() != null){
+                if(passage.getTimes().size() > 1){
                     timeToPassageSuivant = getTimeInMinutes(DateUtils.formatElapsedTime(passage.getTimes().get(1).getRealtimeArrival()));
                 }
             }
@@ -334,7 +340,6 @@ public class CreateAReminderFragment extends Fragment {
         checkActivateReminder.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if(checkActivateReminder.isChecked()){
-                    // TODO : start a background service that udpate the next passages
                     if(timeToPassageSuivant == null){
                         checkActivateReminder.toggle();
                     }
@@ -343,7 +348,6 @@ public class CreateAReminderFragment extends Fragment {
                     }
                 }
                 else{
-                    // TODO : kill the background service
                     cancelReminder();
                 }
             }
@@ -370,6 +374,11 @@ public class CreateAReminderFragment extends Fragment {
     }
 
     public void startReminder() {
+        if(pendingIntent != null){
+            AlarmManager alarm = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+            alarm.cancel(pendingIntent);
+        }
+
         alarmIntent = new Intent(getContext(), AlarmReceiver.class);
         alarmIntent.putExtra("ligneId", ligne.getId());
         alarmIntent.putExtra("ligneType", ligne.getType());
@@ -400,6 +409,15 @@ public class CreateAReminderFragment extends Fragment {
         }
         else{
             checkAddToFavorites.setChecked(false);
+        }
+    }
+
+    private void toggleCheckReminder() {
+        if(alarmIntent != null && alarmIntent.getStringExtra("direction").contains(selectedDirection)){
+            checkActivateReminder.setChecked(true);
+        }
+        else{
+            checkActivateReminder.setChecked(false);
         }
     }
 
