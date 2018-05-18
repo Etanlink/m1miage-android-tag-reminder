@@ -1,5 +1,6 @@
 package android.miage.m1.uga.edu.tagreminder.feature.accueil.choisirArretParLigne;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.miage.m1.uga.edu.tagreminder.R;
 import android.miage.m1.uga.edu.tagreminder.feature.accueil.creerUnRappel.CreateAReminderFragment;
@@ -42,6 +43,7 @@ public class PickAStopFragment extends Fragment {
     List<Arret> dataList = new ArrayList<Arret>();
 
     private ArretItemClickListener arretItemClickListener = new ArretItemClickListener() {
+        @SuppressLint("ResourceType")
         @Override
         public void onItemClick(Arret arret) {
             CreateAReminderFragment createAReminderFragment = CreateAReminderFragment.newInstance(ligne, arret);
@@ -98,6 +100,8 @@ public class PickAStopFragment extends Fragment {
         recyclerView.setAdapter(arretAdapter);
 
         fetchStopData();
+        /* Fetch the alert for the given stop */
+        fetchAlert();
 
         return view;
     }
@@ -146,6 +150,10 @@ public class PickAStopFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void fetchAlert() {
+        // TODO : Avertir l'utilisateur lorsqu'un incident se produit impactant la ligne surveillée. Utilisez l'API "Données dynamiques" avec le paramètre evtTC.
     }
 
 }
